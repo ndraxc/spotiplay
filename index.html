@@ -3,898 +3,748 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify-like Web Player</title>
+    <title>Simple Photobooth</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #1db954;
-            --dark: #121212;
-            --light-dark: #181818;
-            --lighter-dark: #282828;
-            --lightest-dark: #535353;
-            --text: #ffffff;
-            --text-secondary: #b3b3b3;
+            --primary-color: #4a6fa5;
+            --secondary-color: #166088;
+            --accent-color: #4fc3f7;
+            --dark-color: #1a2639;
+            --light-color: #f0f4ef;
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: var(--dark);
-            color: var(--text);
-            height: 100vh;
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            grid-template-rows: auto 1fr auto;
-            grid-template-areas: 
-                "sidebar header"
-                "sidebar main"
-                "player player";
-        }
-
-        /* Sidebar */
-        .sidebar {
-            grid-area: sidebar;
-            background-color: var(--dark);
-            padding: 20px;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            gap: 30px;
         }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
-
-        .logo i {
-            color: var(--primary);
+        
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            color: var(--text);
-        }
-
-        .nav-link i {
-            font-size: 20px;
-        }
-
-        .playlists {
-            margin-top: auto;
+        
+        .container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 2rem;
         }
-
-        .playlist-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.2s;
-        }
-
-        .playlist-link:hover {
-            color: var(--text);
-        }
-
-        /* Header */
-        .header {
-            grid-area: header;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 20px 30px;
+        
+        .camera-section {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
+            flex-direction: column;
+            gap: 1rem;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        .search-bar {
-            background-color: var(--text);
-            border-radius: 20px;
-            padding: 8px 15px;
+        
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        
+        #video {
+            width: 100%;
+            border-radius: 8px;
+            display: block;
+            background-color: #000;
+        }
+        
+        .controls {
             display: flex;
-            align-items: center;
-            width: 300px;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
         }
-
-        .search-bar input {
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
             border: none;
-            outline: none;
-            background: transparent;
-            width: 100%;
-            margin-left: 10px;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: var(--dark);
-            padding: 5px 10px;
-            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
             cursor: pointer;
-        }
-
-        .user-profile img {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        /* Main Content */
-        .main {
-            grid-area: main;
-            background: linear-gradient(to bottom, #3c096c, var(--dark));
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .greeting {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 22px;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            background-color: var(--lighter-dark);
-            padding: 15px;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-            cursor: pointer;
-        }
-
-        .card:hover {
-            background-color: var(--lightest-dark);
-        }
-
-        .card-img {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-
-        .card-title {
-            font-weight: 600;
-            margin-bottom: 5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .card-desc {
-            font-size: 14px;
-            color: var(--text-secondary);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* Player */
-        .player {
-            grid-area: player;
-            background-color: var(--lighter-dark);
-            border-top: 1px solid var(--lightest-dark);
-            padding: 10px 20px;
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .now-playing {
             display: flex;
             align-items: center;
-            gap: 15px;
-            min-width: 200px;
-        }
-
-        .now-playing-img {
-            width: 56px;
-            height: 56px;
-            object-fit: cover;
-        }
-
-        .song-info {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .song-name {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .song-artist {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .song-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-left: 10px;
-        }
-
-        .song-actions i {
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .song-actions i:hover {
-            color: var(--text);
-        }
-
-        .player-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .control-buttons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .control-buttons i {
-            font-size: 20px;
-            cursor: pointer;
+            gap: 0.5rem;
             transition: all 0.2s;
         }
-
-        .control-buttons i:hover {
-            color: var(--primary);
+        
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
         }
-
-        .control-buttons i.play-pause {
-            background-color: var(--text);
-            color: var(--dark);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        button.danger {
+            background-color: #e74c3c;
+        }
+        
+        button.success {
+            background-color: #2ecc71;
+        }
+        
+        .gallery-section {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .collage-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
             justify-content: center;
         }
-
-        .control-buttons i.play-pause:hover {
-            transform: scale(1.05);
+        
+        .collage-container {
+            display: grid;
+            gap: 0.5rem;
+            margin: 1rem auto;
+            max-width: 800px;
         }
-
-        .progress-container {
+        
+        .collage-4 {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+        }
+        
+        .collage-8 {
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+        }
+        
+        .collage-item {
+            position: relative;
             width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            aspect-ratio: 1;
+            overflow: hidden;
+            border-radius: 5px;
         }
-
-        .progress-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-            min-width: 40px;
-        }
-
-        .progress-bar {
-            flex-grow: 1;
-            height: 4px;
-            background-color: var(--lightest-dark);
-            border-radius: 2px;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .progress {
-            position: absolute;
-            top: 0;
-            left: 0;
+        
+        .collage-item img {
+            width: 100%;
             height: 100%;
-            background-color: var(--text-secondary);
-            border-radius: 2px;
-            width: 0%;
+            object-fit: cover;
+            filter: brightness(100%) contrast(100%) saturate(100%);
+            transition: filter 0.3s;
         }
-
-        .progress:hover, .progress.active {
-            background-color: var(--primary);
-        }
-
-        .player-options {
+        
+        .filter-options {
             display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 15px;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 1rem 0;
         }
-
-        .volume-control {
+        
+        .filter-option {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            width: 120px;
-        }
-
-        .volume-control i {
-            color: var(--text-secondary);
-            font-size: 16px;
-        }
-
-        .volume-bar {
-            height: 4px;
-            background-color: var(--lightest-dark);
-            border-radius: 2px;
-            flex-grow: 1;
             cursor: pointer;
-            position: relative;
         }
-
-        .volume-progress {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background-color: var(--text-secondary);
-            border-radius: 2px;
-            width: 70%;
+        
+        .filter-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            border: 2px solid transparent;
         }
-
-        /* File Upload */
-        .file-upload {
+        
+        .filter-preview:hover {
+            border-color: var(--accent-color);
+        }
+        
+        .filter-preview.active {
+            border-color: var(--primary-color);
+        }
+        
+        .canvas-container {
             display: none;
+            margin: 1rem auto;
         }
-
-        .upload-btn {
-            background-color: var(--primary);
-            padding: 10px 15px;
-            border-radius: 20px;
+        
+        #resultCanvas {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .download-section {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            margin: 20px 0;
+            justify-content: center;
+            margin-top: 1rem;
         }
-
-        /* Icons */
-        .material-icons {
-            font-family: 'Material Icons';
-            font-weight: normal;
-            font-style: normal;
-            font-size: 24px;
-            line-height: 1;
-            letter-spacing: normal;
-            text-transform: none;
-            display: inline-block;
-            white-space: nowrap;
-            word-wrap: normal;
-            direction: ltr;
-            -webkit-font-feature-settings: 'liga';
-            -webkit-font-smoothing: antialiased;
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
         }
-
-        /* Responsive */
+        
         @media (max-width: 768px) {
-            body {
-                grid-template-columns: 1fr;
-                grid-template-areas: 
-                    "header"
-                    "main"
-                    "player";
+            .controls {
+                flex-direction: column;
+                align-items: center;
             }
-            .sidebar {
-                display: none;
+            
+            button {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo">
-            <i class="material-icons">music_note</i>
-            <span>Musicfy</span>
-        </div>
-        
-        <div class="nav-links">
-            <a href="#" class="nav-link active">
-                <i class="material-icons">home</i>
-                <span>Home</span>
-            </a>
-            <a href="#" class="nav-link">
-                <i class="material-icons">search</i>
-                <span>Search</span>
-            </a>
-            <a href="#" class="nav-link">
-                <i class="material-icons">library_music</i>
-                <span>Your Library</span>
-            </a>
-        </div>
-        
-        <div class="playlists">
-            <a href="#" class="playlist-link">Create Playlist</a>
-            <a href="#" class="playlist-link">Liked Songs</a>
-            <a href="#" class="playlist-link">Your Episodes</a>
-        </div>
-
-        <!-- File Upload Button -->
-        <label for="file-upload" class="upload-btn">
-            <i class="material-icons">upload</i>
-            <span>Upload Music</span>
-        </label>
-        <input type="file" id="file-upload" class="file-upload" accept="audio/*" multiple>
-    </div>
+    <header>
+        <h1>Simple Photobooth</h1>
+    </header>
     
-    <!-- Header -->
-    <div class="header">
-        <div class="search-bar">
-            <i class="material-icons">search</i>
-            <input type="text" placeholder="Search for songs, artists, or albums">
-        </div>
-        
-        <div class="user-profile">
-            <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="User">
-            <span>John Doe</span>
-        </div>
-    </div>
-    
-    <!-- Main Content -->
-    <div class="main">
-        <h1 class="greeting">Good afternoon</h1>
-        
-        <h2 class="section-title">Recently played</h2>
-        <div class="cards-container" id="recently-played">
-            <!-- Cards will be added dynamically -->
-        </div>
-        
-        <h2 class="section-title">Made for you</h2>
-        <div class="cards-container" id="made-for-you">
-            <!-- Cards will be added dynamically -->
-        </div>
-    </div>
-    
-    <!-- Player -->
-    <div class="player">
-        <div class="now-playing">
-            <img src="https://i.scdn.co/image/ab67616d00004851c08d11dfdcf95809d4f376df" alt="Now Playing" class="now-playing-img">
-            <div class="song-info">
-                <span class="song-name">Blinding Lights</span>
-                <span class="song-artist">The Weeknd</span>
-            </div>
-            <div class="song-actions">
-                <i class="material-icons">favorite_border</i>
-                <i class="material-icons">picture_in_picture_alt</i>
-            </div>
-        </div>
-        
-        <div class="player-controls">
-            <div class="control-buttons">
-                <i class="material-icons" id="shuffle-btn">shuffle</i>
-                <i class="material-icons" id="prev-btn">skip_previous</i>
-                <i class="material-icons play-pause" id="play-btn">play_arrow</i>
-                <i class="material-icons" id="next-btn">skip_next</i>
-                <i class="material-icons" id="repeat-btn">repeat</i>
-            </div>
+    <main>
+        <div class="container">
+            <section class="camera-section">
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline></video>
+                </div>
+                
+                <div class="controls">
+                    <button id="captureBtn"><i class="fas fa-camera"></i> Capture</button>
+                    <button id="switchCameraBtn"><i class="fas fa-exchange-alt"></i> Switch Camera</button>
+                    <button id="flashBtn"><i class="fas fa-bolt"></i> Flash: Off</button>
+                    <button id="wideAngleBtn"><i class="fas fa-expand"></i> Wide Angle</button>
+                    <button id="resetBtn" class="secondary"><i class="fas fa-redo"></i> Reset</button>
+                </div>
+            </section>
             
-            <div class="progress-container">
-                <span class="progress-time" id="current-time">0:00</span>
-                <div class="progress-bar" id="progress-bar-container">
-                    <div class="progress" id="progress-bar"></div>
+            <section class="gallery-section">
+                <h2>Create Collage</h2>
+                
+                <div class="collage-options">
+                    <button id="collage4Btn">4-Photo Collage</button>
+                    <button id="collage8Btn">8-Photo Collage</button>
+                    <button id="clearCollageBtn" class="secondary">Clear Collage</button>
                 </div>
-                <span class="progress-time" id="duration">3:20</span>
-            </div>
-        </div>
-        
-        <div class="player-options">
-            <div class="volume-control">
-                <i class="material-icons" id="volume-icon">volume_up</i>
-                <div class="volume-bar" id="volume-bar-container">
-                    <div class="volume-progress" id="volume-bar"></div>
+                
+                <div id="collage4" class="collage-container collage-4" style="display: none;">
+                    <!-- 4-photo collage items will be added here -->
                 </div>
-            </div>
+                
+                <div id="collage8" class="collage-container collage-8" style="display: none;">
+                    <!-- 8-photo collage items will be added here -->
+                </div>
+                
+                <div class="filter-options">
+                    <div class="filter-option" data-filter="normal">
+                        <div class="filter-preview active" style="background-color: #fff;"></div>
+                        <span>Normal</span>
+                    </div>
+                    <div class="filter-option" data-filter="sepia">
+                        <div class="filter-preview" style="background-color: #704214; filter: sepia(100%);"></div>
+                        <span>Sepia</span>
+                    </div>
+                    <div class="filter-option" data-filter="grayscale">
+                        <div class="filter-preview" style="background-color: #808080; filter: grayscale(100%);"></div>
+                        <span>Grayscale</span>
+                    </div>
+                    <div class="filter-option" data-filter="brightness">
+                        <div class="filter-preview" style="background-color: #fff; filter: brightness(150%);"></div>
+                        <span>Bright</span>
+                    </div>
+                    <div class="filter-option" data-filter="contrast">
+                        <div class="filter-preview" style="background-color: #fff; filter: contrast(150%);"></div>
+                        <span>High Contrast</span>
+                    </div>
+                    <div class="filter-option" data-filter="hue">
+                        <div class="filter-preview" style="background-color: #fff; filter: hue-rotate(90deg);"></div>
+                        <span>Hue Shift</span>
+                    </div>
+                    <div class="filter-option" data-filter="vintage">
+                        <div class="filter-preview" style="background-color: #704214; filter: sepia(50%) brightness(90%) contrast(120%);"></div>
+                        <span>Vintage</span>
+                    </div>
+                    <div class="filter-option" data-filter="cool">
+                        <div class="filter-preview" style="background-color: #fff; filter: brightness(110%) hue-rotate(180deg) saturate(120%);"></div>
+                        <span>Cool</span>
+                    </div>
+                </div>
+                
+                <div class="canvas-container">
+                    <canvas id="resultCanvas"></canvas>
+                    <div class="download-section">
+                        <button id="downloadBtn" class="success"><i class="fas fa-download"></i> Download</button>
+                    </div>
+                </div>
+            </section>
         </div>
-    </div>
-
+    </main>
+    
+    <footer>
+        <p>&copy; 2023 Simple Photobooth. All rights reserved.</p>
+    </footer>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Audio context and elements
-            const audioPlayer = new Audio();
-            const playBtn = document.getElementById('play-btn');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const shuffleBtn = document.getElementById('shuffle-btn');
-            const repeatBtn = document.getElementById('repeat-btn');
-            const progressBar = document.getElementById('progress-bar');
-            const progressContainer = document.getElementById('progress-bar-container');
-            const currentTimeDisplay = document.getElementById('current-time');
-            const durationDisplay = document.getElementById('duration');
-            const volumeBar = document.getElementById('volume-bar');
-            const volumeContainer = document.getElementById('volume-bar-container');
-            const volumeIcon = document.getElementById('volume-icon');
-            const nowPlayingImg = document.querySelector('.now-playing-img');
-            const songName = document.querySelector('.song-name');
-            const songArtist = document.querySelector('.song-artist');
-            const fileUpload = document.getElementById('file-upload');
-
-            // Sample music data
-            let musicLibrary = [
-                {
-                    id: 1,
-                    title: "Blinding Lights",
-                    artist: "The Weeknd",
-                    album: "After Hours",
-                    cover: "https://i.scdn.co/image/ab67616d00004851c08d11dfdcf95809d4f376df",
-                    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-                    duration: 200 // in seconds
-                },
-                {
-                    id: 2,
-                    title: "Save Your Tears",
-                    artist: "The Weeknd",
-                    album: "After Hours",
-                    cover: "https://i.scdn.co/image/ab67616d00004851c08d11dfdcf95809d4f376df",
-                    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-                    duration: 215
-                },
-                {
-                    id: 3,
-                    title: "Stay",
-                    artist: "The Kid LAROI, Justin Bieber",
-                    album: "F*CK LOVE 3: OVER YOU",
-                    cover: "https://i.scdn.co/image/ab67616d000048512e8b5a6b283a9f6a0b9b05a4",
-                    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-                    duration: 141
-                }
-            ];
-
-            let currentSongIndex = 0;
-            let isPlaying = false;
-            let isShuffled = false;
-            let isRepeated = false;
-            let originalPlaylistOrder = [...musicLibrary];
-
-            // Initialize the player
-            function initPlayer() {
-                // Load the first song
-                loadSong(currentSongIndex);
-                
-                // Populate recently played and made for you sections
-                updateCardsDisplay();
-                
-                // Set up event listeners
-                setupEventListeners();
-            }
-
-            // Load a song into the player
-            function loadSong(index) {
-                if (musicLibrary.length === 0) return;
-                
-                const song = musicLibrary[index];
-                audioPlayer.src = song.url;
-                nowPlayingImg.src = song.cover;
-                songName.textContent = song.title;
-                songArtist.textContent = song.artist;
-                durationDisplay.textContent = formatTime(song.duration);
-                
-                // Update card UI to show currently playing song
-                updateCurrentlyPlayingCard(song.id);
-                
-                // Play if was playing before
-                if (isPlaying) {
-                    audioPlayer.play()
-                        .then(() => {
-                            playBtn.textContent = 'pause';
-                        })
-                        .catch(error => {
-                            console.error('Playback failed:', error);
-                            alert('Playback failed. Please try again.');
-                        });
-                }
-            }
-
-            // Play the current song
-            function playSong() {
-                if (musicLibrary.length === 0) {
-                    alert('No songs available. Please upload some music first.');
-                    return;
-                }
-                
-                audioPlayer.play()
-                    .then(() => {
-                        isPlaying = true;
-                        playBtn.textContent = 'pause';
-                    })
-                    .catch(error => {
-                        console.error('Playback failed:', error);
-                        alert('Playback failed. Please try again.');
-                    });
-            }
-
-            // Pause the current song
-            function pauseSong() {
-                audioPlayer.pause();
-                isPlaying = false;
-                playBtn.textContent = 'play_arrow';
-            }
-
-            // Play the next song
-            function nextSong() {
-                if (musicLibrary.length === 0) return;
-                
-                if (isShuffled) {
-                    currentSongIndex = Math.floor(Math.random() * musicLibrary.length);
-                } else {
-                    currentSongIndex = (currentSongIndex + 1) % musicLibrary.length;
-                }
-                
-                loadSong(currentSongIndex);
-                if (isPlaying) playSong();
-            }
-
-            // Play the previous song
-            function prevSong() {
-                if (musicLibrary.length === 0) return;
-                
-                if (audioPlayer.currentTime > 3) {
-                    // If more than 3 seconds into song, restart current song
-                    audioPlayer.currentTime = 0;
-                } else {
-                    // If less than 3 seconds, go to previous song
-                    currentSongIndex = (currentSongIndex - 1 + musicLibrary.length) % musicLibrary.length;
-                    loadSong(currentSongIndex);
-                    if (isPlaying) playSong();
-                }
-            }
-
-            // Toggle shuffle
-            function toggleShuffle() {
-                isShuffled = !isShuffled;
-                
-                if (isShuffled) {
-                    shuffleBtn.style.color = '#1db954';
-                    originalPlaylistOrder = [...musicLibrary];
-                    
-                    // Shuffle the playlist
-                    for (let i = musicLibrary.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [musicLibrary[i], musicLibrary[j]] = [musicLibrary[j], musicLibrary[i]];
-                    }
-                } else {
-                    shuffleBtn.style.color = '#b3b3b3';
-                    musicLibrary = [...originalPlaylistOrder];
-                }
-                
-                updateCardsDisplay();
-            }
-
-            // Toggle repeat
-            function toggleRepeat() {
-                isRepeated = !isRepeated;
-                audioPlayer.loop = isRepeated;
-                repeatBtn.style.color = isRepeated ? '#1db954' : '#b3b3b3';
-            }
-
-            // Update progress bar
-            function updateProgress() {
-                const { currentTime, duration } = audioPlayer;
-                const progressPercent = (currentTime / duration) * 100;
-                progressBar.style.width = `${progressPercent}%`;
-                
-                // Update current time display
-                currentTimeDisplay.textContent = formatTime(currentTime);
-            }
-
-            // Set progress when clicked on progress bar
-            function setProgress(e) {
-                const width = this.clientWidth;
-                const clickX = e.offsetX;
-                const duration = audioPlayer.duration;
-                audioPlayer.currentTime = (clickX / width) * duration;
-            }
-
-            // Set volume when clicked on volume bar
-            function setVolume(e) {
-                const width = this.clientWidth;
-                const clickX = e.offsetX;
-                const volume = Math.min(1, Math.max(0, clickX / width));
-                audioPlayer.volume = volume;
-                volumeBar.style.width = `${volume * 100}%`;
-                
-                // Update volume icon
-                if (volume === 0) {
-                    volumeIcon.textContent = 'volume_off';
-                } else if (volume < 0.5) {
-                    volumeIcon.textContent = 'volume_down';
-                } else {
-                    volumeIcon.textContent = 'volume_up';
-                }
-            }
-
-            // Format time in seconds to MM:SS
-            function formatTime(seconds) {
-                const mins = Math.floor(seconds / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            }
-
-            // Update cards display
-            function updateCardsDisplay() {
-                const recentlyPlayedContainer = document.getElementById('recently-played');
-                const madeForYouContainer = document.getElementById('made-for-you');
-                
-                recentlyPlayedContainer.innerHTML = '';
-                madeForYouContainer.innerHTML = '';
-                
-                musicLibrary.forEach(song => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.dataset.songId = song.id;
-                    
-                    card.innerHTML = `
-                        <img src="${song.cover}" alt="${song.title}" class="card-img">
-                        <h3 class="card-title">${song.title}</h3>
-                        <p class="card-desc">${song.artist} • ${song.album}</p>
-                    `;
-                    
-                    recentlyPlayedContainer.appendChild(card.cloneNode(true));
-                    madeForYouContainer.appendChild(card);
+            // DOM Elements
+            const video = document.getElementById('video');
+            const captureBtn = document.getElementById('captureBtn');
+            const switchCameraBtn = document.getElementById('switchCameraBtn');
+            const flashBtn = document.getElementById('flashBtn');
+            const wideAngleBtn = document.getElementById('wideAngleBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const collage4Btn = document.getElementById('collage4Btn');
+            const collage8Btn = document.getElementById('collage8Btn');
+            const clearCollageBtn = document.getElementById('clearCollageBtn');
+            const collage4 = document.getElementById('collage4');
+            const collage8 = document.getElementById('collage8');
+            const filterOptions = document.querySelectorAll('.filter-option');
+            const resultCanvas = document.getElementById('resultCanvas');
+            const canvasContainer = document.querySelector('.canvas-container');
+            const downloadBtn = document.getElementById('downloadBtn');
+            
+            // Variables
+            let stream = null;
+            let currentFacingMode = 'user'; // 'user' for front camera, 'environment' for back
+            let flashOn = false;
+            let wideAngle = false;
+            let currentFilter = 'normal';
+            let capturedPhotos = [];
+            let currentCollageType = null;
+            
+            // Initialize camera
+            initCamera();
+            
+            // Event Listeners
+            captureBtn.addEventListener('click', capturePhoto);
+            switchCameraBtn.addEventListener('click', switchCamera);
+            flashBtn.addEventListener('click', toggleFlash);
+            wideAngleBtn.addEventListener('click', toggleWideAngle);
+            resetBtn.addEventListener('click', resetCamera);
+            collage4Btn.addEventListener('click', () => startCollage(4));
+            collage8Btn.addEventListener('click', () => startCollage(8));
+            clearCollageBtn.addEventListener('click', clearCollage);
+            downloadBtn.addEventListener('click', downloadImage);
+            
+            filterOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    currentFilter = option.dataset.filter;
+                    updateActiveFilter();
+                    applyFilterToCollage();
                 });
-            }
-
-            // Update the currently playing card in the UI
-            function updateCurrentlyPlayingCard(songId) {
-                document.querySelectorAll('.card').forEach(card => {
-                    if (parseInt(card.dataset.songId) === songId) {
-                        card.style.border = '2px solid #1db954';
-                    } else {
-                        card.style.border = 'none';
-                    }
-                });
-            }
-
-            // Handle file upload
-            function handleFileUpload(e) {
-                const files = e.target.files;
-                
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    
-                    if (file.type.startsWith('audio/')) {
-                        const url = URL.createObjectURL(file);
-                        
-                        // Create a new song object with placeholder duration
-                        const newSong = {
-                            id: Date.now() + i,
-                            title: file.name.replace(/\.[^/.]+$/, ""),
-                            artist: "Unknown Artist",
-                            album: "Local Files",
-                            cover: "https://via.placeholder.com/300",
-                            url: url,
-                            duration: 0 // Will be updated when metadata loads
-                        };
-                        
-                        // Add to library immediately
-                        musicLibrary.push(newSong);
-                        
-                        // Create a temporary audio element to get duration
-                        const audio = new Audio();
-                        audio.src = url;
-                        
-                        audio.addEventListener('loadedmetadata', () => {
-                            // Update the song's duration
-                            newSong.duration = audio.duration;
-                            
-                            // Update display
-                            updateCardsDisplay();
-                            
-                            // If this is the first song, load it
-                            if (musicLibrary.length === 1) {
-                                currentSongIndex = 0;
-                                loadSong(currentSongIndex);
-                            }
-                        });
-                        
-                        audio.addEventListener('error', () => {
-                            console.error('Error loading audio file:', file.name);
-                            // Remove the song if it failed to load
-                            musicLibrary = musicLibrary.filter(s => s.id !== newSong.id);
-                            updateCardsDisplay();
-                        });
-                    }
-                }
-                
-                // Reset the file input to allow uploading the same files again
-                fileUpload.value = '';
-            }
-
-            // Set up event listeners
-            function setupEventListeners() {
-                // Player controls
-                playBtn.addEventListener('click', () => {
-                    isPlaying ? pauseSong() : playSong();
-                });
-                
-                prevBtn.addEventListener('click', prevSong);
-                nextBtn.addEventListener('click', nextSong);
-                shuffleBtn.addEventListener('click', toggleShuffle);
-                repeatBtn.addEventListener('click', toggleRepeat);
-                
-                // Progress bar
-                audioPlayer.addEventListener('timeupdate', updateProgress);
-                audioPlayer.addEventListener('ended', () => {
-                    if (!isRepeated) {
-                        nextSong();
-                    }
-                });
-                
-                progressContainer.addEventListener('click', setProgress);
-                
-                // Volume control
-                volumeContainer.addEventListener('click', setVolume);
-                audioPlayer.volume = 0.7;
-                volumeBar.style.width = '70%';
-                
-                // File upload
-                fileUpload.addEventListener('change', handleFileUpload);
-                
-                // Song card clicks
-                document.addEventListener('click', function(e) {
-                    if (e.target.closest('.card')) {
-                        const card = e.target.closest('.card');
-                        const songId = parseInt(card.dataset.songId);
-                        const songIndex = musicLibrary.findIndex(song => song.id === songId);
-                        
-                        if (songIndex !== -1) {
-                            currentSongIndex = songIndex;
-                            loadSong(currentSongIndex);
-                            playSong();
+            });
+            
+            // Functions
+            async function initCamera() {
+                try {
+                    const constraints = {
+                        video: {
+                            facingMode: currentFacingMode,
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
                         }
+                    };
+                    
+                    if (wideAngle) {
+                        constraints.video.facingMode = { exact: 'environment' };
+                        constraints.video.width = { ideal: 1920 };
+                        constraints.video.height = { ideal: 1080 };
+                    }
+                    
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = stream;
+                } catch (err) {
+                    console.error('Error accessing camera:', err);
+                    alert('Could not access the camera. Please make sure you have granted camera permissions.');
+                }
+            }
+            
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            }
+            
+            function switchCamera() {
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                stopCamera();
+                initCamera();
+            }
+            
+            function toggleFlash() {
+                flashOn = !flashOn;
+                flashBtn.innerHTML = `<i class="fas fa-bolt"></i> Flash: ${flashOn ? 'On' : 'Off'}`;
+                
+                if (flashOn) {
+                    flashBtn.classList.add('success');
+                } else {
+                    flashBtn.classList.remove('success');
+                }
+            }
+            
+            function toggleWideAngle() {
+                wideAngle = !wideAngle;
+                wideAngleBtn.innerHTML = `<i class="fas fa-expand"></i> ${wideAngle ? 'Normal Lens' : 'Wide Angle'}`;
+                stopCamera();
+                initCamera();
+            }
+            
+            function resetCamera() {
+                stopCamera();
+                currentFacingMode = 'user';
+                flashOn = false;
+                wideAngle = false;
+                flashBtn.innerHTML = `<i class="fas fa-bolt"></i> Flash: Off`;
+                flashBtn.classList.remove('success');
+                wideAngleBtn.innerHTML = `<i class="fas fa-expand"></i> Wide Angle`;
+                initCamera();
+            }
+            
+            function capturePhoto() {
+                if (!stream) return;
+                
+                // Create canvas to capture the photo
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                
+                // Apply flash effect if enabled
+                if (flashOn) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                
+                // Draw the video frame
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Apply filter
+                applyFilterToCanvas(ctx, canvas.width, canvas.height);
+                
+                // Create image data URL
+                const photoDataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                capturedPhotos.push(photoDataUrl);
+                
+                // Add to collage if active
+                if (currentCollageType) {
+                    addPhotoToCollage(photoDataUrl);
+                } else {
+                    // Show single photo
+                    showResult(canvas);
+                }
+                
+                // Flash effect
+                if (flashOn) {
+                    document.body.style.backgroundColor = 'white';
+                    setTimeout(() => {
+                        document.body.style.backgroundColor = '';
+                    }, 100);
+                }
+            }
+            
+            function applyFilterToCanvas(ctx, width, height) {
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const data = imageData.data;
+                
+                switch(currentFilter) {
+                    case 'sepia':
+                        for (let i = 0; i < data.length; i += 4) {
+                            const r = data[i];
+                            const g = data[i + 1];
+                            const b = data[i + 2];
+                            
+                            data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+                            data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+                            data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+                        }
+                        break;
+                        
+                    case 'grayscale':
+                        for (let i = 0; i < data.length; i += 4) {
+                            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                            data[i] = avg;
+                            data[i + 1] = avg;
+                            data[i + 2] = avg;
+                        }
+                        break;
+                        
+                    case 'brightness':
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = Math.min(255, data[i] * 1.5);
+                            data[i + 1] = Math.min(255, data[i + 1] * 1.5);
+                            data[i + 2] = Math.min(255, data[i + 2] * 1.5);
+                        }
+                        break;
+                        
+                    case 'contrast':
+                        const factor = (259 * (150 + 255)) / (255 * (259 - 150));
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = factor * (data[i] - 128) + 128;
+                            data[i + 1] = factor * (data[i + 1] - 128) + 128;
+                            data[i + 2] = factor * (data[i + 2] - 128) + 128;
+                        }
+                        break;
+                        
+                    case 'hue':
+                        for (let i = 0; i < data.length; i += 4) {
+                            const r = data[i];
+                            const g = data[i + 1];
+                            const b = data[i + 2];
+                            
+                            data[i] = g;
+                            data[i + 1] = b;
+                            data[i + 2] = r;
+                        }
+                        break;
+                        
+                    case 'vintage':
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = Math.min(255, data[i] * 0.9);
+                            data[i + 1] = Math.min(255, data[i + 1] * 0.8);
+                            data[i + 2] = Math.min(255, data[i + 2] * 0.7);
+                            data[i] += 20;
+                            data[i + 1] += 10;
+                        }
+                        break;
+                        
+                    case 'cool':
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i + 1] = Math.min(255, data[i + 1] * 1.2);
+                            data[i + 2] = Math.min(255, data[i + 2] * 1.1);
+                        }
+                        break;
+                        
+                    // 'normal' filter does nothing
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+            }
+            
+            function startCollage(type) {
+                currentCollageType = type;
+                capturedPhotos = [];
+                
+                if (type === 4) {
+                    collage4.style.display = 'grid';
+                    collage8.style.display = 'none';
+                } else {
+                    collage4.style.display = 'none';
+                    collage8.style.display = 'grid';
+                }
+                
+                // Clear existing collage items
+                clearCollageElements();
+            }
+            
+            function addPhotoToCollage(photoDataUrl) {
+                const collageContainer = currentCollageType === 4 ? collage4 : collage8;
+                const existingItems = collageContainer.querySelectorAll('.collage-item');
+                
+                if (existingItems.length < currentCollageType) {
+                    const collageItem = document.createElement('div');
+                    collageItem.className = 'collage-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = photoDataUrl;
+                    img.dataset.filter = currentFilter;
+                    
+                    collageItem.appendChild(img);
+                    collageContainer.appendChild(collageItem);
+                    
+                    // Apply filter to the new image
+                    applyFilterToImage(img);
+                    
+                    // If collage is complete, show the result
+                    if (existingItems.length + 1 === currentCollageType) {
+                        createCollageResult();
+                    }
+                }
+            }
+            
+            function applyFilterToCollage() {
+                const collageContainer = currentCollageType === 4 ? collage4 : collage8;
+                const images = collageContainer.querySelectorAll('img');
+                
+                images.forEach(img => {
+                    img.dataset.filter = currentFilter;
+                    applyFilterToImage(img);
+                });
+            }
+            
+            function applyFilterToImage(img) {
+                const filter = img.dataset.filter;
+                
+                switch(filter) {
+                    case 'normal':
+                        img.style.filter = 'brightness(100%) contrast(100%) saturate(100%)';
+                        break;
+                    case 'sepia':
+                        img.style.filter = 'sepia(100%)';
+                        break;
+                    case 'grayscale':
+                        img.style.filter = 'grayscale(100%)';
+                        break;
+                    case 'brightness':
+                        img.style.filter = 'brightness(150%)';
+                        break;
+                    case 'contrast':
+                        img.style.filter = 'contrast(150%)';
+                        break;
+                    case 'hue':
+                        img.style.filter = 'hue-rotate(90deg)';
+                        break;
+                    case 'vintage':
+                        img.style.filter = 'sepia(50%) brightness(90%) contrast(120%)';
+                        break;
+                    case 'cool':
+                        img.style.filter = 'brightness(110%) hue-rotate(180deg) saturate(120%)';
+                        break;
+                }
+            }
+            
+            function createCollageResult() {
+                const collageContainer = currentCollageType === 4 ? collage4 : collage8;
+                const images = collageContainer.querySelectorAll('img');
+                
+                // Calculate canvas size (square for simplicity)
+                const canvasSize = Math.min(window.innerWidth - 40, 800);
+                resultCanvas.width = canvasSize;
+                resultCanvas.height = canvasSize;
+                
+                const ctx = resultCanvas.getContext('2d');
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvasSize, canvasSize);
+                
+                // Draw grid based on collage type
+                const columns = currentCollageType === 4 ? 2 : 4;
+                const rows = currentCollageType === 4 ? 2 : 2;
+                const cellWidth = canvasSize / columns;
+                const cellHeight = canvasSize / rows;
+                
+                // Create an array to track loaded images
+                const loadedImages = [];
+                
+                // Load all images first
+                let loadedCount = 0;
+                images.forEach((imgElement, index) => {
+                    const img = new Image();
+                    img.onload = function() {
+                        loadedImages[index] = img;
+                        loadedCount++;
+                        
+                        // When all images are loaded, draw them
+                        if (loadedCount === images.length) {
+                            for (let i = 0; i < loadedImages.length; i++) {
+                                const col = i % columns;
+                                const row = Math.floor(i / columns);
+                                ctx.drawImage(loadedImages[i], col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                            }
+                            
+                            // Add watermark
+                            ctx.font = '20px Arial';
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                            ctx.fillText('Photobooth', 20, canvasSize - 20);
+                            
+                            canvasContainer.style.display = 'block';
+                        }
+                    };
+                    img.src = imgElement.src;
+                });
+            }
+            
+            function clearCollage() {
+                clearCollageElements();
+                currentCollageType = null;
+                capturedPhotos = [];
+                collage4.style.display = 'none';
+                collage8.style.display = 'none';
+                canvasContainer.style.display = 'none';
+            }
+            
+            function clearCollageElements() {
+                while (collage4.firstChild) {
+                    collage4.removeChild(collage4.firstChild);
+                }
+                while (collage8.firstChild) {
+                    collage8.removeChild(collage8.firstChild);
+                }
+            }
+            
+            function showResult(canvas) {
+                resultCanvas.width = canvas.width;
+                resultCanvas.height = canvas.height;
+                const ctx = resultCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, 0);
+                
+                // Add watermark
+                ctx.font = '30px Arial';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillText('Photobooth', 30, canvas.height - 30);
+                
+                canvasContainer.style.display = 'block';
+            }
+            
+            function downloadImage() {
+                const link = document.createElement('a');
+                link.download = `photobooth-${new Date().toISOString().slice(0, 10)}.jpg`;
+                link.href = resultCanvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+            }
+            
+            function updateActiveFilter() {
+                filterOptions.forEach(option => {
+                    const preview = option.querySelector('.filter-preview');
+                    if (option.dataset.filter === currentFilter) {
+                        preview.classList.add('active');
+                    } else {
+                        preview.classList.remove('active');
                     }
                 });
             }
-
-            // Initialize the player
-            initPlayer();
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (currentCollageType && capturedPhotos.length === currentCollageType) {
+                    createCollageResult();
+                }
+            });
         });
     </script>
 </body>
