@@ -691,7 +691,7 @@
                 isShuffled = !isShuffled;
                 
                 if (isShuffled) {
-                    shuffleBtn.style.color = var(--primary);
+                    shuffleBtn.style.color = '#1db954';
                     originalPlaylistOrder = [...musicLibrary];
                     
                     // Shuffle the playlist
@@ -700,7 +700,7 @@
                         [musicLibrary[i], musicLibrary[j]] = [musicLibrary[j], musicLibrary[i]];
                     }
                 } else {
-                    shuffleBtn.style.color = var(--text-secondary);
+                    shuffleBtn.style.color = '#b3b3b3';
                     musicLibrary = [...originalPlaylistOrder];
                 }
                 
@@ -711,7 +711,7 @@
             function toggleRepeat() {
                 isRepeated = !isRepeated;
                 audioPlayer.loop = isRepeated;
-                repeatBtn.style.color = isRepeated ? var(--primary) : var(--text-secondary);
+                repeatBtn.style.color = isRepeated ? '#1db954' : '#b3b3b3';
             }
 
             // Update progress bar
@@ -785,7 +785,7 @@
             function updateCurrentlyPlayingCard(songId) {
                 document.querySelectorAll('.card').forEach(card => {
                     if (parseInt(card.dataset.songId) === songId) {
-                        card.style.border = '2px solid var(--primary)';
+                        card.style.border = '2px solid #1db954';
                     } else {
                         card.style.border = 'none';
                     }
@@ -802,32 +802,49 @@
                     if (file.type.startsWith('audio/')) {
                         const url = URL.createObjectURL(file);
                         
-                        // Create a new audio element to get duration
+                        // Create a new song object with placeholder duration
+                        const newSong = {
+                            id: Date.now() + i,
+                            title: file.name.replace(/\.[^/.]+$/, ""),
+                            artist: "Unknown Artist",
+                            album: "Local Files",
+                            cover: "https://via.placeholder.com/300",
+                            url: url,
+                            duration: 0 // Will be updated when metadata loads
+                        };
+                        
+                        // Add to library immediately
+                        musicLibrary.push(newSong);
+                        
+                        // Create a temporary audio element to get duration
                         const audio = new Audio();
                         audio.src = url;
                         
                         audio.addEventListener('loadedmetadata', () => {
-                            musicLibrary.push({
-                                id: Date.now() + i,
-                                title: file.name.replace(/\.[^/.]+$/, ""),
-                                artist: "Unknown Artist",
-                                album: "Local Files",
-                                cover: "https://via.placeholder.com/300",
-                                url: url,
-                                duration: audio.duration
-                            });
+                            // Update the song's duration
+                            newSong.duration = audio.duration;
                             
                             // Update display
                             updateCardsDisplay();
                             
-                            // If first song, play it
+                            // If this is the first song, load it
                             if (musicLibrary.length === 1) {
                                 currentSongIndex = 0;
                                 loadSong(currentSongIndex);
                             }
                         });
+                        
+                        audio.addEventListener('error', () => {
+                            console.error('Error loading audio file:', file.name);
+                            // Remove the song if it failed to load
+                            musicLibrary = musicLibrary.filter(s => s.id !== newSong.id);
+                            updateCardsDisplay();
+                        });
                     }
                 }
+                
+                // Reset the file input to allow uploading the same files again
+                fileUpload.value = '';
             }
 
             // Set up event listeners
